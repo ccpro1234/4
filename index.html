@@ -26,7 +26,7 @@ body{
  display:flex;
  justify-content:center;
  position:relative;
- overflow-x:hidden;
+ overflow-x:auto;
 }
 
 /* ===== ต่อด้วย CSS อื่นทั้งหมด ===== */
@@ -37,7 +37,13 @@ body::before{
 }
 
 /* LEFT */
-.left-panel{width:320px;display:flex;flex-direction:column;gap:15px}
+.left-panel{
+    width:320px;
+    max-width:100%;
+    display:flex;
+    flex-direction:column;
+    gap:15px;
+}
 
 .box{
  background:var(--panel-bg);
@@ -54,20 +60,35 @@ body::before{
 }
 
 .bead-scroll-area{
- height:350px;
- overflow-x:auto;
- background:#000;
- border:1px solid #333;
+    width:100%;
+    overflow-x:auto;
+    overflow-y:hidden;
+    -webkit-overflow-scrolling:touch;
+    background:#000;
+    border:1px solid #333;
 }
 
 .bead-grid{
-  display:grid;
-  grid-template-rows:repeat(6,38px);   /* 🔥 6 แถวตายตัว */
-  grid-auto-flow:column;
-  grid-auto-columns:38px;              /* 🔥 คอลัมแน่น */
-  gap:2px;                              /* 🔥 ลดระยะห่าง */
-  padding:4px;
-  justify-content:start;
+    display:grid;
+    grid-auto-flow:column;
+    gap:2px;
+    padding:4px;
+    justify-content:start;
+    width:max-content;
+}
+
+@media (max-width:768px){
+    .bead-grid{
+        grid-template-rows:repeat(6,24px);
+        grid-auto-columns:24px;
+    }
+}
+
+@media (min-width:769px){
+    .bead-grid{
+        grid-template-rows:repeat(6,38px);
+        grid-auto-columns:38px;
+    }
 }
 
 .bead{
@@ -121,7 +142,55 @@ body::before{
   align-items:center;
   gap:6px;
 }
+/* ===============================
+   MOBILE LAYOUT
+================================ */
 
+@media (max-width:768px){
+
+    body{
+        padding:8px;
+    }
+
+    .layout{
+        display:block;
+        width:100%;
+    }
+
+    .left-panel{
+        width:100%;
+        margin-bottom:12px;
+    }
+
+    .right-panel{
+        width:100%;
+    }
+
+    .box{
+        width:100%;
+        box-sizing:border-box;
+    }
+
+    .bead-scroll-area{
+        width:100%;
+        overflow-x:auto;
+        overflow-y:hidden;
+    }
+
+    .bead-grid{
+        width:max-content;
+    }
+
+    /* ⭐ เพิ่มตรงนี้ */
+    .controls{
+        flex-wrap:wrap;
+    }
+
+    .patterns-container{
+        grid-template-columns:1fr;
+    }
+
+}
 /* =========================
    📱 MOBILE FRIENDLY (เพิ่ม)
    ========================= */
@@ -855,18 +924,15 @@ function renderBeadRoad(){
     const rows = 6;
     const cols = Math.ceil(history.length / rows) || 1;
 
-    // ความกว้างพื้นที่แสดง
-    const areaWidth = area.clientWidth - 10;
-
-    // ขนาดช่องอัตโนมัติ (16px - 38px)
-    const cell = Math.max(
-        16,
-        Math.min(38, Math.floor(areaWidth / cols))
-    );
+    // ✅ ขนาดคงที่
+    const cell = window.innerWidth < 768 ? 24 : 38;
 
     // ตั้งค่า Grid
     grid.style.gridTemplateRows = `repeat(${rows}, ${cell}px)`;
     grid.style.gridAutoColumns = `${cell}px`;
+
+    // ให้ Grid กว้างตามจำนวนคอลัมน์
+    grid.style.width = "max-content";
 
     for(let i = 0; i < rows * cols; i++){
 
@@ -893,6 +959,9 @@ function renderBeadRoad(){
 
         grid.appendChild(d);
     }
+
+    // ✅ เลื่อนไปคอลัมน์ล่าสุดอัตโนมัติ
+    area.scrollLeft = area.scrollWidth;
 }
 
 init();
